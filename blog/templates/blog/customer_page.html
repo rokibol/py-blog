@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Blog Portal</title>
+</head>
+<body>
+    <h1>📋 কাস্টমার ব্লগ পোর্টাল (সবগুলো পোস্টের তালিকা)</h1>
+    <hr>
+
+    <!-- আমরা ফেজ-৩ তে Jinja2/DTL টেমপ্লেট ইঞ্জিন নিয়ে আলোচনা করেছিলাম, মনে আছে? -->
+    <!-- এটি একদম Laravel-এর @foreach এর মতো কাজ করে -->
+    {% for post in posts %}
+        <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px;">
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+            
+            <!-- যদি এআই সামারি তৈরি করে থাকে, তবে তা দেখাবে -->
+            {% if post.ai_summary %}
+                <p style="color: blue; font-style: italic;">{{ post.ai_summary }}</p>
+            {% endif %}
+            
+            <small>পোস্ট করার সময়: {{ post.created_at }}</small>
+        </div>
+    {% empty %}
+        <p>দুঃখিত, কোনো ব্লগ পোস্ট পাওয়া যায়নি।</p>
+    {% endfor %}
+
+</body>
+</html>
