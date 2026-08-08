@@ -48,6 +48,38 @@ jobs:
         script: |
           mkdir -p /root/apps/py-blog
           cd /root/apps/py-blog
-          curl -sSL -o docker-compose.yml https://githubusercontent.com
+          
+          cat << 'EOF' > docker-compose.yml
+          version: '3.8'
+
+          services:
+            django_web:
+              image: rokibol/django-app:latest
+              build:
+                context: .
+                dockerfile: Django.Dockerfile
+              ports:
+                - "8002:8002"
+              volumes:
+                - .:/app
+              environment:
+                - PYTHONUNBUFFERED=1
+              depends_on:
+                - fastapi_ai
+
+            fastapi_ai:
+              image: rokibol/fastapi-ai:latest
+              build:
+                context: .
+                dockerfile: FastAPI.Dockerfile
+              ports:
+                - "8003:8003"
+              volumes:
+                - .:/app
+              extra_hosts:
+                - "host.docker.internal:host-gateway"
+          EOF
+          
           docker compose pull
           docker compose up -d --remove-orphans
+
