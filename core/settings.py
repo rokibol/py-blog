@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-j_a12eh0-imj*^#mpgn+nzj^e()(6lanjkt8eme@maqso$svbr
 DEBUG = True
 
 # core/settings.py এর ভেতর
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'python.nextcomltd.com']
+ALLOWED_HOSTS = ['*']
 
 
 
