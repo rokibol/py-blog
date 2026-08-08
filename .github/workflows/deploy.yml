@@ -1,6 +1,5 @@
 name: CI/CD Production Pipeline
 
-# মেইন ব্রাঞ্চে কোড পুশ (git push origin main) হলেই এই পাইপলাইন ফায়ার হবে
 on:
   push:
     branches: [ main ]
@@ -8,33 +7,26 @@ on:
 jobs:
   test_and_build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-    # ১. গিটহাবের রানারে আপনার কোডটি ক্লোন করা
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # ২. পাইথন এনভায়রনমেন্ট সেটআপ করা
     - name: Set up Python Environment
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
-    # ৩. সিআই পার্ট (Continuous Integration) - অটোমেটেড আর্কিটেকচারাল টেস্টিং
     - name: Install Dependencies & Run Tests
       run: |
         pip install -r requirements.txt
-        python manage.py check # জ্যাঙ্গোর ব্যাকএন্ড কনফিগারেশন চেক
+        python manage.py check
 
-    # ৪. গিটহাব সিক্রেটস ব্যবহার করে ডকার হাবের সাথে কানেক্ট হওয়া
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    # 5. সিডি পার্ট (Continuous Deployment) - আপনার 'rokibol' অ্যাকাউন্টে ইমেজ বিল্ড ও পুশ
     - name: Build and Push Docker Images
       run: |
         docker build -t rokibol/django-app:latest -f Django.Dockerfile .
@@ -46,17 +38,16 @@ jobs:
     needs: test_and_build
     runs-on: ubuntu-latest
     steps:
-    # ৬. আপনার ১২ জিবি র‍্যামের শক্তিশালী ভিপিএস সার্ভারে SSH চাবি দিয়ে অটো-লগইন এবং কন্টেইনার রান
     - name: Deploy to Live Cloud Server via SSH
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
         script: |
           mkdir -p /root/apps/py-blog
           cd /root/apps/py-blog
-          # গিটহাব থেকে সরাসরি আপনার আপডেট হওয়া ডকার কম্পোজ ফাইলটি ভিপিএস-এ নামানো
-          curl -o docker-compose.yml https://githubusercontent.com{{ github.repository }}/main/docker-compose.yml
+          curl -o docker-compose.yml https://githubusercontent.com
           docker compose pull
           docker compose up -d --remove-orphans
