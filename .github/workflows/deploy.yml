@@ -60,8 +60,6 @@ jobs:
                 dockerfile: Django.Dockerfile
               ports:
                 - "8002:8002"
-              volumes:
-                - .:/app
               environment:
                 - PYTHONUNBUFFERED=1
               depends_on:
@@ -74,8 +72,6 @@ jobs:
                 dockerfile: FastAPI.Dockerfile
               ports:
                 - "8003:8003"
-              volumes:
-                - .:/app
               extra_hosts:
                 - "host.docker.internal:host-gateway"
           EOF
