@@ -1,0 +1,2 @@
+# python manage.py runserver
+uvicorn api:app --port 8001 --reload

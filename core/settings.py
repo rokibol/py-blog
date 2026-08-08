@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-j_a12eh0-imj*^#mpgn+nzj^e()(6lanjkt8eme@maqso$svbr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# core/settings.py এর ভেতর
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'python.nextcomltd.com']
+
 
 
 # Application definition

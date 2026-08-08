@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # জ্যাঙ্গো ওয়েব সার্ভিস (মেইন ফ্রন্টএন্ড পোর্টাল)
+  django_web:
+    image: rokibol/django-app:latest  # 👈 গিটহাব সিআই/সিডি-র জন্য আপনার ইমেজ নেম সেট করা হলো
+    build:
+      context: .
+      dockerfile: Django.Dockerfile
+    ports:
+      - "8002:8002"  # বাইরের ৮০M২ পোর্ট ভেতরের ৮০M২ পোর্টের সাথে ম্যাপ করা
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - fastapi_ai
+
+  # ফাস্টএপিআই এআই সার্ভিস (ব্যাকগ্রাউন্ড এলএলএম ইঞ্জিন)
+  fastapi_ai:
+    image: rokibol/fastapi-ai:latest  # 👈 আপনার ডকার হাব ইউজারনেম অনুযায়ী ইমেজ নেম সেট করা হলো
+    build:
+      context: .
+      dockerfile: FastAPI.Dockerfile
+    ports:
+      - "8003:8003"  # বাইরের ৮০M৩ পোর্ট ভেতরের ৮০M৩ পোর্টের সাথে ম্যাপ করা
+    volumes:
+      - .:/app
+    # উইন্ডোজ/ম্যাক বা ক্লাউড লিনাক্স হোস্টে থাকা ওলামা (Ollama) সার্ভারকে ডকারের ভেতর থেকে কানেক্ট করার অফিশিয়াল গেটওয়ে
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

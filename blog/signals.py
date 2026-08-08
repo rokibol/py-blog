@@ -12,7 +12,7 @@ def analyze_blog_content(sender, instance, **kwargs):
     # যদি আমরা নতুন পোস্ট তৈরি করি বা কন্টেন্ট এডিট করি
     if instance.content:
         # আমাদের ৮০০১ পোর্টের এআই সার্ভারের ঠিকানা
-        ai_url = "http://127.0.0.1:8001/analyze-post"
+        ai_url = "http://127.0.0.1:8002/analyze-post"
 
         payload = {"content": instance.content}
         
@@ -33,4 +33,3 @@ def analyze_blog_content(sender, instance, **kwargs):
             # যদি কানেকশনই হতে না পারে (যেমন পোর্ট ব্লক বা নেটওয়ার্ক ইস্যু)
             print(f"🚨 [AI Connection Failed]: Could not connect to FastAPI. Error: {error}")
             instance.ai_summary = "[AI Service is currently offline]"
-
