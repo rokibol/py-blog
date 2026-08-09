@@ -7,4 +7,7 @@ urlpatterns = [
 
     # --- নতুন পোস্ট তৈরি করার ফর্মের রাস্তা ---
     path('customer/posts/create/', views.post_create, name='create_post'),
+
+    path('ai-chat/', views.ai_pdf_chat, name='ai_pdf_chat'),
+
 ]

@@ -1,5 +1,9 @@
 from django.shortcuts import render, redirect
 from .models import Post # আমাদের ডাটাবেজ মডেলটি ইম্পোর্ট করলাম
+import requests
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import DocumentAI
 
 # এটি লারাভেলের public function customerPage() এর মতো একটি কন্ট্রোলার মেথড
 def customer_post_list(request):
@@ -32,3 +36,22 @@ def post_create(name_or_request):
         
     # ২. ইউজার যখন সাধারণ লিংকে ঢুকবে, তখন শুধু খালি ফর্ম পেজটি দেখাও (GET Request)
     return render(request, 'blog/create_post.html')
+
+def ai_pdf_chat(request):
+    # ডাটাবেজে থাকা শেষ আপলোড হওয়া পিডিএফ-টি নেওয়া
+    latest_doc = DocumentAI.objects.order_by('-uploaded_at').first()
+    
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        user_question = request.POST.get('question')
+        
+        # ফাস্টএপিআই আরএগে (RAG) রিকোয়েস্ট পাঠানো
+        try:
+            api_url = "http://fastapi_ai:8003/ask-pdf"
+            response = requests.post(api_url, json={"question": user_question}, timeout=45)
+            if response.status_code == 200:
+                return JsonResponse({"answer": response.json().get("answer")})
+            return JsonResponse({"answer": "Error: AI engine failed to respond."}, status=500)
+        except Exception as e:
+            return JsonResponse({"answer": f"Connection Error: {str(e)}"}, status=500)
+
+    return render(request, 'blog/pdf_chat.html', {'doc': latest_doc})

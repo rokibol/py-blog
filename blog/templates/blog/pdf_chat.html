@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Local RAG - Chat with PDF AI Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <style>
+        #chat-box { height: 400px; overflow-y: auto; background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+        .user-msg { background: #0d6efd; color: white; padding: 8px 12px; border-radius: 15px; margin-bottom: 10px; width: fit-content; max-width: 75%; margin-left: auto; }
+        .ai-msg { background: #e9ecef; color: #333; padding: 8px 12px; border-radius: 15px; margin-bottom: 10px; width: fit-content; max-width: 75%; }
+    </style>
+</head>
+<body class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4 text-center">🧠 Local RAG: Chat with PDF Engine</h2>
+            
+            <div id="chat-box" class="mb-3 d-flex flex-column">
+                <div class="ai-msg">Hello! Upload a PDF to the server, and ask me anything about it completely offline.</div>
+            </div>
+
+            <!-- pdf_chat.html এর ভেতর আগের <form> কেটে হুবহু এটি বসান -->
+            <form id="chat-form" onsubmit="return false;" class="input-group">
+                {% csrf_token %}
+                <input type="text" id="user-input" class="form-control" placeholder="Ask a question about your PDF document..." required>
+                <!-- 💡 বাটন টাইপ button করার কারণে এটি আর পেজ রিফ্রেশ করতে পারবে না -->
+                <button type="button" id="submit-btn" class="btn btn-primary">Ask Llama3 🚀</button>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        function sendQuestion() {
+            let question = $('#user-input').val();
+            if (!question.trim()) return;
+
+            // ১. স্ক্রিনে ইউজারের প্রশ্নটি যুক্ত করা
+            $('#chat-box').append(`<div class="user-msg">${question}</div>`);
+            $('#user-input').val('');
+            $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+
+            // ২. ডাটা লোড হওয়ার সময় একটি সুন্দর ওয়েটিং নোটিশ দেখানো
+            let loadingId = 'loading-' + Date.now();
+            $('#chat-box').append(`<div class="ai-msg" id="${loadingId}">🤖 Thinkng... Llama3 is reading your PDF completely offline...</div>`);
+            $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+
+            // ৩. জ্যাঙ্গো ভিউ-তে নিখুঁত এজাক্স (AJAX) কল করা
+            $.ajax({
+                url: "{% url 'ai_pdf_chat' %}",
+                type: "POST",
+                data: {
+                    'question': question,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function(data) {
+                    // ওয়েটিং নোটিশটি সরিয়ে আসল উত্তর বসানো
+                    $(`#${loadingId}`).html(`🤖 ${data.answer}`);
+                    $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+                },
+                error: function() {
+                    $(`#${loadingId}`).html(`<span class="text-danger">🚨 Failed to reach AI engine. Check if your PDF processed.</span>`);
+                }
+            });
+        }
+
+        // মাউস দিয়ে বাটনে ক্লিক করলে কাজ করবে
+        $('#submit-btn').on('click', function() {
+            sendQuestion();
+        });
+
+        // কীবোর্ডের Enter বোতাম চাপলেও পেজ রিফ্রেশ না হয়ে সরাসরি চ্যাট সাবমিট হবে
+        $('#user-input').on('keypress', function(e) {
+            if (e.which == 13) {
+                sendQuestion();
+            }
+        });
+    </script>
+
+</body>
+</html>

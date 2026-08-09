@@ -20,3 +20,13 @@ class Post(models.Model):
     # এটি দিলে জ্যাঙ্গো অ্যাডমিন প্যানেলে অবজেক্টের বদলে পোস্টের টাইটেল সরাসরি দেখাবে
     def __str__(self):
         return self.title
+
+# blog/models.py এর নিচে এটি যোগ করুন:
+class DocumentAI(models.Model):
+    title = models.CharField(max_length=255)
+    pdf_file = models.FileField(upload_to='uploaded_pdfs/') # ডকার ভলিউমের সাথে সিঙ্ক হবে
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_processed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
